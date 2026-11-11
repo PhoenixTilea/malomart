@@ -1,12 +1,12 @@
 import { email, string, enum as zenum } from "zod";
 
+import { PlainText } from "../common";
+
 export const Email = email({ error: "Enter a valid email address." })
   .max(254, { error: "Email addresses can't be longer than 254 characters." })
   .meta({ id: "Email", example: "link@hyrule.com" });
 
-export const DisplayName = string()
-  .trim()
-  .min(1, { error: "Enter your name." })
+export const DisplayName = PlainText.min(1, { error: "Enter your name." })
   .max(100, { error: "Names can't be longer than 100 characters." })
   .meta({ description: "The user's display name.", example: "Link" });
 

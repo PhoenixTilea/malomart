@@ -16,9 +16,11 @@
     "spec": "pnpm --filter api spec",
     "dev": "turbo run dev --filter=@mm/api --filter=@mm/ui --ui=stream",
     "deploy:dev": "pnpm --filter @mm/ui build && pnpm --filter @mm/infra cdk deploy \"MaloMartDev/*\" --outputs-file ../local/cdk-outputs.json && pnpm --filter @mm/api env:dev",
+    "deploy:prod": "pnpm --filter @mm/ui build && pnpm --filter @mm/infra cdk deploy \"MaloMartProd/*\" --outputs-file ../local/prod-outputs.json",
     "deploy:domain": "pnpm --filter @mm/infra cdk deploy MaloMartDomain MaloMartMail --outputs-file ../local/domain-outputs.json",
     "inbox": "pnpm --filter @mm/tools inbox",
     "seed": "turbo run build --filter=@mm/tools... --output-logs=errors-only && pnpm --filter @mm/tools seed",
+    "seed:prod": "pnpm seed --stage prod",
     "dev:session": "turbo run build --filter=@mm/tools... --output-logs=errors-only && pnpm --filter @mm/tools dev:session",
     "prepare": "husky"
   },

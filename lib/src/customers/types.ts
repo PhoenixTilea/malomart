@@ -1,7 +1,7 @@
 import type { infer as zinfer } from "zod";
 import { number, record, strictObject, string, enum as zenum } from "zod";
 
-import { Id, PositiveInt } from "../common";
+import { Id, PlainText, PositiveInt } from "../common";
 
 export const Regions = [
   "Akkala",
@@ -42,17 +42,18 @@ export type Customer = zinfer<typeof Customer>;
 export const Address = strictObject({
   id: Id,
   customerId: Id,
-  label: string()
-    .trim()
-    .nonempty({ error: "Enter a label or leave it blank." })
+  label: PlainText.nonempty({ error: "Enter a label or leave it blank." })
     .max(40, { error: "Labels can't be longer than 40 characters." })
     .optional(),
-  recipient: string()
-    .trim()
-    .nonempty({ error: "Enter who receives deliveries here." })
-    .max(100, { error: "Names can't be longer than 100 characters." }),
-  street: string().trim().nonempty({ error: "Enter a street address." }),
-  city: string().trim().nonempty({ error: "Enter a city." }),
+  recipient: PlainText.nonempty({ error: "Enter who receives deliveries here." }).max(100, {
+    error: "Names can't be longer than 100 characters."
+  }),
+  street: PlainText.nonempty({ error: "Enter a street address." }).max(100, {
+    error: "Street addresses can't be longer than 100 characters."
+  }),
+  city: PlainText.nonempty({ error: "Enter a city." }).max(100, {
+    error: "Cities can't be longer than 100 characters."
+  }),
   region: Region,
   postalCode: string().regex(/^\d{5}$/, { error: "Enter a 5-digit postal code." })
 });

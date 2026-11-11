@@ -18,15 +18,19 @@ type SeedImage = { key: string; data: Buffer };
 
 const usage = `Usage:
   pnpm seed [options]
-    Writes the seed catalog to the Dev stage's products table and uploads each product's images
+    Writes the seed catalog to a stage's products table and uploads each product's images
     through the upload staging bucket so the image processor builds their variants.
     Re-running overwrites seeded products in place; their IDs are derived from their slugs.
+    --stage <name>    Stage to seed: dev (default) or prod.
     --reset           Delete every product and product image first, including ones not in the seed data.
     --skip-images     Write products only.
     --help            Show this message.`;
 
 const ROOT = path.resolve(import.meta.dirname, "../../..");
-const OUTPUTS_FILE = path.join(ROOT, "local/cdk-outputs.json");
+const STAGES = {
+  dev: { prefix: "Dev", outputsFile: path.join(ROOT, "local/cdk-outputs.json"), deployScript: "deploy:dev" },
+  prod: { prefix: "Prod", outputsFile: path.join(ROOT, "local/prod-outputs.json"), deployScript: "deploy:prod" }
+};
 const SPRITES_DIR = path.join(ROOT, "local/sprites");
 const SEED_NAMESPACE = "7c2f0e1a-9b4d-4c8e-a5f3-2d6b8e1c4a90";
 const IMAGE_WAIT_MS = 120_000;
@@ -43,21 +47,23 @@ const uuidV5 = (name: string) => {
   return [hex.slice(0, 8), hex.slice(8, 12), hex.slice(12, 16), hex.slice(16, 20), hex.slice(20)].join("-");
 };
 
-const loadOutputs = async () => {
+const loadOutputs = async ({ prefix, outputsFile, deployScript }: (typeof STAGES)[keyof typeof STAGES]) => {
   let outputs: Record<string, Record<string, string>>;
   try {
-    outputs = JSON.parse(await readFile(OUTPUTS_FILE, "utf8"));
+    outputs = JSON.parse(await readFile(outputsFile, "utf8"));
   } catch (err) {
-    throw new Error(`Could not read ${OUTPUTS_FILE}. Run "pnpm deploy:dev" first.`, { cause: err });
+    throw new Error(`Could not read ${outputsFile}. Run "pnpm ${deployScript}" first.`, { cause: err });
   }
 
-  const tableNames = outputs["Dev-MaloMartDbStack"]?.TableNames;
+  const tableNames = outputs[`${prefix}-MaloMartDbStack`]?.TableNames;
   if (!tableNames) {
-    throw new Error(`No table names for Dev-MaloMartDbStack in ${OUTPUTS_FILE}. Run "pnpm deploy:dev".`);
+    throw new Error(`No table names for ${prefix}-MaloMartDbStack in ${outputsFile}. Run "pnpm ${deployScript}".`);
   }
-  const bucketNames = outputs["Dev-MaloMartFrontendStack"]?.BucketNames;
+  const bucketNames = outputs[`${prefix}-MaloMartFrontendStack`]?.BucketNames;
   if (!bucketNames) {
-    throw new Error(`No bucket names for Dev-MaloMartFrontendStack in ${OUTPUTS_FILE}. Run "pnpm deploy:dev".`);
+    throw new Error(
+      `No bucket names for ${prefix}-MaloMartFrontendStack in ${outputsFile}. Run "pnpm ${deployScript}".`
+    );
   }
   return {
     tables: TableNames.parse(JSON.parse(tableNames)),
@@ -134,6 +140,7 @@ const waitForImages = async (TableName: string, expected: Map<string, string[]>)
 const main = async () => {
   const { values: args } = parseArgs({
     options: {
+      stage: { type: "string", default: "dev" },
       reset: { type: "boolean", default: false },
       "skip-images": { type: "boolean", default: false },
       help: { type: "boolean", default: false }
@@ -150,7 +157,10 @@ const main = async () => {
     throw new Error(`Duplicate product slugs in seed data: ${[...new Set(duplicates)].join(", ")}`);
   }
 
-  const { tables, buckets } = await loadOutputs();
+  if (!Object.hasOwn(STAGES, args.stage)) {
+    throw new Error(`Unknown stage "${args.stage}". Expected one of: ${Object.keys(STAGES).join(", ")}.`);
+  }
+  const { tables, buckets } = await loadOutputs(STAGES[args.stage as keyof typeof STAGES]);
   const withImages = !args["skip-images"];
 
   if (args.reset) {

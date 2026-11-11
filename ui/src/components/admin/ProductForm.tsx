@@ -12,7 +12,7 @@ import {
 import { schemaResolver, useForm } from "@mantine/form";
 import { ApiRequestError } from "@mm/lib/api";
 import type { ProductDto, UpdateProductBody } from "@mm/lib/products";
-import { Category, createProduct, Product, products, updateProduct } from "@mm/lib/products";
+import { Category, createProduct, MAX_FEATURES, Product, products, updateProduct } from "@mm/lib/products";
 import { useRef, useState } from "react";
 import { number, object, preprocess, enum as zenum } from "zod";
 
@@ -231,9 +231,11 @@ const ProductForm = ({ product, onSaved }: ProductFormProps) => {
               </li>
             ))}
           </ul>
-          <Button variant="subtle" size="compact-sm" data-add-feature onClick={addFeature}>
-            {ui.admin.form.addFeature}
-          </Button>
+          {features.length < MAX_FEATURES && (
+            <Button variant="subtle" size="compact-sm" data-add-feature onClick={addFeature}>
+              {ui.admin.form.addFeature}
+            </Button>
+          )}
         </fieldset>
         <Group justify="flex-end" align="center">
           <span role="status" className={classes.status}>

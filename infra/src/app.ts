@@ -27,7 +27,7 @@ new MailStack(app, "MaloMartMail", {
     : undefined
 });
 
-const stages: Record<string, { env: StackProps["env"]; config: StageConfig }> = {
+const stages: Record<string, { env: StackProps["env"]; config: StageConfig; retainData?: boolean }> = {
   Dev: {
     env,
     config: {
@@ -41,16 +41,35 @@ const stages: Record<string, { env: StackProps["env"]; config: StageConfig }> = 
         secretName: "malomart/dev/google-oauth"
       }
     }
+  },
+  Prod: {
+    env,
+    retainData: true,
+    config: {
+      siteDomain: { zoneName: DOMAIN_NAME, hostName: DOMAIN_NAME },
+      redirectWww: true,
+      emailDomain: DOMAIN_NAME,
+      alarmEmail: process.env.PROD_ALARM_EMAIL,
+      googleAuth: {
+        authDomain: { zoneName: DOMAIN_NAME, hostName: `auth.${DOMAIN_NAME}` },
+        secretName: "malomart/prod/google-oauth"
+      }
+    }
   }
 };
 
-for (const [stageName, { env, config }] of Object.entries(stages)) {
+for (const [stageName, { env, config, retainData }] of Object.entries(stages)) {
   const stage = new Stage(app, `MaloMart${stageName}`, {
     env,
     stageName
   });
   configureStacks(stage, config);
   RemovalPolicies.of(stage).destroy();
+  if (retainData) {
+    RemovalPolicies.of(stage).retain({
+      applyToResourceTypes: ["AWS::DynamoDB::Table", "AWS::Cognito::UserPool", "AWS::KMS::Key"]
+    });
+  }
 }
 
 app.synth();
