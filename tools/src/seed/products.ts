@@ -151,13 +151,23 @@ export const products: SeedProduct[] = [
     images: ["tp-items/quest/ordon-pumpkin.png"]
   },
   {
+    slug: "pumpkin-soup",
+    title: "Pumpkin Soup (Bottled)",
+    description: "Authentic Snowpeak recipe. Warm enough to brave the mountain. Bring a spoon. Or don't.",
+    category: "Food",
+    price: 40,
+    stockCount: 6,
+    features: ["Restores health", "Made with Ordon pumpkin"],
+    images: ["tp-items/bottles/orange-spotted.png"]
+  },
+  {
     slug: "pumpkin-seeds",
     title: "Pumpkin Seeds",
     description: "Plant them. Wait. Get pumpkins. Or eat them now.",
     category: "Food",
     price: 5,
     stockCount: 50,
-    features: [],
+    features: ["Plant or snack", "Grows Ordon pumpkins"],
     images: ["tp-items/collectibles/pumpkin-seeds.png"]
   },
   {
@@ -248,7 +258,7 @@ export const products: SeedProduct[] = [
     category: "Gadgets",
     price: 40,
     stockCount: 7,
-    features: [],
+    features: ["Calls your horse", "Fits in a pocket"],
     images: ["tp-items/inventory/horse-call.png"]
   },
   {
@@ -318,16 +328,6 @@ export const products: SeedProduct[] = [
     stockCount: 40,
     features: ["Restores nothing", "Strong aftertaste"],
     images: ["tp-items/bottles/black.png"]
-  },
-  {
-    slug: "rare-chu-jelly",
-    title: "Rare Chu Jelly",
-    description: "Rare. Heals a lot. Do not ask where we got it.",
-    category: "Potions",
-    price: 150,
-    stockCount: 1,
-    features: ["Restores all hearts", "Limited supply"],
-    images: ["tp-items/bottles/orange-spotted.png"]
   },
   {
     slug: "lantern-oil",
@@ -408,7 +408,7 @@ export const products: SeedProduct[] = [
     category: "Weapons",
     price: 20,
     stockCount: 15,
-    features: [],
+    features: ["Lightweight", "Beginner-friendly", "Bonks, does not cut"],
     images: ["tp-items/equipment/wooden-sword.png"]
   },
   {
